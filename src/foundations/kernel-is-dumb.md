@@ -87,7 +87,7 @@ The crate-level doc comment in `lib.rs` line 7 states this explicitly:
 //! The Kernel is a pure, decentralized WASM runner. It contains no business
 //! logic, no cognitive loops, and no network servers. Its sole responsibility
 //! is to instantiate `astrid_events::EventBus`, load `.capsule` files into
-//! the Extism sandbox, and route IPC bytes between them.
+//! the Wasmtime sandbox, and route IPC bytes between them.
 ```
 
 The `#![deny(unsafe_code)]` and `#![deny(missing_docs)]` attributes at lines 1 and 2 enforce memory safety and documentation completeness across the entire crate. The kernel does not use `unsafe` because it does not need to do anything low-level that the capsule sandbox and host ABI do not already encapsulate.

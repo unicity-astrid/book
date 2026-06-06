@@ -1,0 +1,20 @@
+[book]
+title = "The Astrid Book"
+authors = ["Joshua J. Bouw", "Unicity Labs"]
+description = "The canonical reference for Astrid OS: the kernel, the capsule model, the host ABI, the bus, and the security model."
+language = "en"
+src = "src"
+
+[output.html]
+default-theme = "ayu"
+preferred-dark-theme = "ayu"
+git-repository-url = "https://github.com/unicity-astrid/book"
+edit-url-template = "https://github.com/unicity-astrid/book/edit/main/{path}"
+
+[output.html.fold]
+enable = true
+level = 1
+
+[output.html.search]
+enable = true
+limit-results = 30

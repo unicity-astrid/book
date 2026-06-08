@@ -128,6 +128,7 @@ kv                  = []              # reserved; not currently enforced
 fs_read             = ["cwd://", "home://", "/absolute/path"]
 fs_write            = ["cwd://"]
 host_process        = ["npx"]         # Airlock Override: escape hatch to host
+allow_persistent    = false           # operator sub-grant: persistent (instance-outliving) child procs
 ipc_publish         = ["registry.*"]  # legacy; superseded by [publish] when present
 ipc_subscribe       = ["registry.*"]  # legacy; superseded by [subscribe] when present
 identity            = ["resolve"]     # "resolve", "link", "admin"
@@ -145,6 +146,8 @@ allow_prompt_injection = false        # gate on system-prompt modification
 **`net_connect` patterns.** Each entry is `"host:port"` or `"host:*"`. The host segment is compared case-insensitively. DNS-style wildcards (`*.example.com`) are not supported. IP resolution and SSRF checks run after the manifest gate passes.
 
 **`identity` hierarchy.** `admin` implies all operations. `link` implies `resolve` plus link/unlink/list. `resolve` is read-only lookup only. An empty list denies all identity operations.
+
+**`allow_persistent`.** An operator sub-grant layered on top of `host_process`. `host_process` alone grants only ephemeral exec: the spawned child is reaped when the spawning instance resets. `allow_persistent = true` additionally permits `astrid:process.spawn-persistent`, a host-owned child that outlives the instance. It is fail-closed and operator-reviewed because the consequences are heavier: a persistent child survives its instance, and on macOS (which has no `die-with-parent`) a daemon hard-crash can orphan a still-sandboxed child. Without it, `spawn-persistent` returns `capability-denied` while the ephemeral `spawn` and `spawn-background` remain available under `host_process`.
 
 **`allow_prompt_injection`.** When `false` (the default), hook responses from this capsule have `systemPrompt`, `prependSystemContext`, and `appendSystemContext` fields stripped by the prompt builder before they reach the LLM. Only `prependContext` (user-visible context) passes through. This is a hard security boundary: unprivileged capsules cannot inject arbitrary instructions into the system prompt.
 

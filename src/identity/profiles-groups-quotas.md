@@ -2,6 +2,8 @@
 
 Every principal in Astrid has a *profile* and belongs to zero or more *groups*. The profile is the per-principal policy file: it names group memberships, carries direct capability grants and revokes, sets authentication options, and declares resource quotas. Groups are the operator-managed capability sets that members inherit. The kernel resolves both at invocation time to produce the effective capability set used by the authorisation check.
 
+Three distinct surfaces grant a principal authority, and it helps to keep them straight. This chapter covers **profile and group capability grants**: capability-grammar strings (`capsule:install`, `system:shutdown`) an operator places on a principal or a group, defined by the [capability grammar](../security/capabilities-and-tokens.md) and enumerated in the [Capability Catalog](../appendix/capability-catalog.md). The second surface is the **boolean operator sub-grants** in a capsule's `[capabilities]` table (`net_bind`, `uplink`, `allow_persistent`): each lifts one runtime ceiling rather than naming a resource, and a capsule cannot self-grant them. The third is the cryptographic [capability tokens](../security/capabilities-and-tokens.md): signed, per-principal delegations the runtime mints and checks.
+
 ---
 
 ## Profile location and security boundary

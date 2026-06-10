@@ -16,8 +16,6 @@ fs_write      = ["cwd://out"]
 host_process  = ["git"]
 net_bind      = ["unix:///tmp/myapp.sock"]
 net_connect   = ["db.internal:5432", "cache.internal:*"]
-ipc_publish   = ["myapp.v1.*"]
-ipc_subscribe = ["myapp.v1.*", "llm.v1.response"]
 identity      = ["resolve"]
 allow_prompt_injection = false
 ```
@@ -32,14 +30,14 @@ The fields and their semantics:
 | `host_process` | `Vec<String>` | `[]` | Host process command allowlist |
 | `net_bind` | `Vec<String>` | `[]` | Unix/TCP socket bind capability |
 | `net_connect` | `Vec<String>` | `[]` | Outbound TCP `host:port` allowlist |
-| `ipc_publish` | `Vec<String>` | `[]` | IPC publish topic patterns |
-| `ipc_subscribe` | `Vec<String>` | `[]` | IPC subscribe topic patterns |
 | `identity` | `Vec<String>` | `[]` | Identity operations (`resolve`, `link`, `admin`) |
 | `allow_prompt_injection` | `bool` | `false` | Allow modifying the LLM system prompt via hooks |
 | `uplink` | `bool` | `false` | Disable WASM execution timeout (daemon capsules) |
 | `kv` | `Vec<String>` | `[]` | Declared for future cross-capsule KV; not enforced today |
 
 The `kv` field is present for declaration purposes and is not enforced by a security gate at runtime. KV access is already scoped per-capsule by the store layer.
+
+IPC publish and subscribe permissions are not `[capabilities]` fields; they are the keys of the top-level `[publish]` and `[subscribe]` tables, covered below.
 
 ## The `ManifestSecurityGate`
 
@@ -276,7 +274,9 @@ net_connect = ["db.prod.example.com:5432", "cache.prod.example.com:6379"]
 
 `connect_tcp("db.prod.example.com", 5432)` passes the gate and proceeds to DNS + SSRF check. `connect_tcp("db.prod.example.com", 80)` is denied by the gate because port 80 is not in the allowlist. `connect_tcp("evil.com", 5432)` is denied because the host does not match.
 
-### IPC publish and subscribe (`ipc_publish`, `ipc_subscribe`)
+### IPC publish and subscribe (`[publish]` / `[subscribe]`)
+
+The IPC ACL is the set of keys in the top-level `[publish]` and `[subscribe]` tables (see [The Capsule Manifest and Engines](../capsule-model/manifest-and-engines.md)). At load the kernel resolves those keys into `state.ipc_publish_patterns` and `state.ipc_subscribe_patterns`, the lists the gate checks against.
 
 Topic patterns use dot-separated segments. A `*` in a segment matches exactly one segment. Segment counts must match: `"foo.v1.*"` allows `"foo.v1.event"` but not `"foo.v1.a.b"`. Empty segments are rejected at both declaration-validation and runtime-check time via `has_valid_segments`.
 
@@ -291,18 +291,18 @@ if !state.ipc_publish_patterns.iter().any(|pattern| topic_matches(&topic, patter
 }
 ```
 
-The subscribe ACL runs at subscription time, not at message delivery time. A capsule subscribes to a topic pattern string; the gate checks whether that pattern string is covered by an `ipc_subscribe` entry. Once the subscription is created, the bus delivers events without per-message ACL checks (which would be O(n) per delivery on a broadcast bus).
+The subscribe ACL runs at subscription time, not at message delivery time. A capsule subscribes to a topic pattern string; the gate checks whether that pattern string is covered by a `[subscribe]` key. Once the subscription is created, the bus delivers events without per-message ACL checks (which would be O(n) per delivery on a broadcast bus).
 
-A new manifest format (RFC cargo-like-manifest) declares publish and subscribe entries as keys in `[publish]` and `[subscribe]` tables. When those tables are non-empty, they supersede `capabilities.ipc_publish` / `capabilities.ipc_subscribe` so operators do not double-declare. The `effective_ipc_publish_patterns()` and `effective_ipc_subscribe_patterns()` methods on `CapsuleManifest` implement this precedence.
+The `effective_ipc_publish_patterns()` and `effective_ipc_subscribe_patterns()` methods on `CapsuleManifest` return these keys. The older `[capabilities].ipc_publish` / `ipc_subscribe` arrays were removed; the `[publish]` / `[subscribe]` tables are the only IPC-intent surface.
 
 **Example.** A capsule that participates in an LLM response stream:
 
 ```toml
-[publish."myapp.v1.result"]
-wit_type = "result-payload"
+[publish]
+"myapp.v1.result" = { wit = "result-payload" }
 
-[subscribe."llm.v1.response"]
-handler = "handle_llm_response"
+[subscribe]
+"llm.v1.response" = { wit = "opaque", handler = "handle_llm_response" }
 ```
 
 This grants publish access to the exact topic `"myapp.v1.result"` and subscribe access to `"llm.v1.response"`. An attempt to publish to `"myapp.v1.internal"` returns `ErrorCode::CapabilityDenied`.

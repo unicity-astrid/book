@@ -19,29 +19,26 @@ Topics are dot-delimited strings: segments match `[a-z0-9._-]+`, up to 8 segment
 
 ### Capability gating
 
-Publishing requires an `ipc_publish` allowlist entry matching the target topic. Subscribing requires `ipc_subscribe`. Both lists live in `Capsule.toml [capabilities]`. The CLI capsule, which bridges the Unix-domain uplink, illustrates a real-world example (partial listing):
+Publishing requires a `[publish]` table key matching the target topic; subscribing requires a `[subscribe]` key. Each entry pairs the topic with a WIT payload reference, or `"opaque"` for a capsule that forwards bytes whose schema it does not own. The CLI capsule, which bridges the Unix-domain uplink, is the canonical opaque example (partial listing):
 
 ```toml
 [capabilities]
 uplink = true
 net_bind = ["unix:*"]
-ipc_publish = [
-    "user.v1.prompt",
-    "client.v1.connect",
-    "client.v1.disconnect",
-    # ...
-    "astrid.v1.request.*",
-    # ...
-]
-ipc_subscribe = [
-    "agent.v1.response",
-    "agent.v1.stream.delta",
-    "astrid.v1.approval",
-    # ...
-]
+
+[publish]
+"user.v1.prompt"         = { wit = "opaque" }
+"client.v1.connect"      = { wit = "opaque" }
+"cli.v1.command.execute" = { wit = "opaque" }
+"astrid.v1.request.*"    = { wit = "opaque" }
+
+[subscribe]
+"agent.v1.response"      = { wit = "opaque" }
+"agent.v1.stream.delta"  = { wit = "opaque" }
+"astrid.v1.approval"     = { wit = "opaque" }
 ```
 
-(Source: `capsules/astrid-capsule-cli/Capsule.toml`, abbreviated. The full file contains 11 `ipc_publish` entries and 10 `ipc_subscribe` entries.)
+(Source: `capsules/astrid-capsule-cli/Capsule.toml`, abbreviated. Every topic the uplink relays is declared `wit = "opaque"`, because it forwards payloads it does not define.)
 
 ### Principal attribution
 

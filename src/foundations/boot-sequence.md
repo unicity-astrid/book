@@ -304,7 +304,7 @@ duplicates are logged as warnings and skipped.
 
 - Semver validity of `[package].version`.
 - `astrid-version` constraint against the running kernel's `CARGO_PKG_VERSION`.
-- `ipc_publish` patterns and `[subscribe]` handler event patterns must have no empty segments.
+- `[publish]` and `[subscribe]` topic patterns must have no empty segments.
 - `[imports]` and `[exports]` namespace and interface names must match `^[a-z][a-z0-9-]*$`.
 - Uplink capsules (`capabilities.uplink = true`) must not declare `[imports]`. Uplinks load before
   non-uplinks and cannot depend on them; declaring imports would violate that ordering. This is

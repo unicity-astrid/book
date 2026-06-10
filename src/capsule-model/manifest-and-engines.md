@@ -102,13 +102,15 @@ The `wit` field accepts either:
 - An `@scope/repo/<iface>/<record>` reference, resolved through the registry (registry + lockfile work is behind the same RFC as the manifest format; the kernel does not enforce source pins today).
 - The literal string `"opaque"`, which marks an entry whose payload is not type-checked, used by uplink or proxy capsules that forward raw bytes.
 
+`opaque` is the payload type for capsules that route bytes they do not own. A typed `wit` reference is a contract: the kernel and tooling can rely on the payload shape, and it feeds the schema catalog. An uplink or proxy capsule forwards traffic across many topics whose schemas it cannot know ahead of time, so it sets `wit = "opaque"`. That keeps the entry's publish or subscribe ACL, the boundary the kernel actually enforces, while waiving the type contract: the entry still gates *which* topics the capsule may touch, it just makes no claim about payload shape.
+
 Exactly one of `version`, `tag`, `rev`, `branch`, `path` may be set on the long form. The deserializer rejects manifests that set more than one (`manifest/topics.rs:98-104`).
 
 The `handler` field on a `[subscribe]` entry binds the topic to a `#[astrid::interceptor("...")]` WASM export, making the entry an interceptor binding. An optional `priority` (a `u32`, default `100`, lower fires first) orders it within the chain. Entries without `handler` grant ACL only; the guest still calls `ipc::subscribe()` to receive events.
 
 The `fanout = true` flag on a `[publish]` entry is a documentation hint to tooling that the suffix segment names a recipient (for example `llm.v1.request.generate.*` per LLM provider). The kernel routes wildcard topics regardless of this flag.
 
-**ACL semantics.** The kernel's IPC ACL for publish and subscribe is derived from these tables when they are non-empty. `CapsuleManifest::effective_ipc_publish_patterns()` returns the keys of `[publish]` if that table is present and non-empty, falling back to `capabilities.ipc_publish` otherwise. The same precedence applies to subscribe (`manifest/mod.rs:141-158`). The new format takes precedence so a capsule never double-declares.
+**ACL semantics.** The keys of these tables *are* the kernel's IPC ACL. `CapsuleManifest::effective_ipc_publish_patterns()` returns the keys of `[publish]`, and `effective_ipc_subscribe_patterns()` the keys of `[subscribe]` (`core/crates/astrid-capsule/src/manifest/mod.rs`). A capsule may publish only to topics matching a `[publish]` key and subscribe only to topics matching a `[subscribe]` key; anything else is denied by the kernel. There is no separate ACL array to keep in sync.
 
 #### Interceptor binding from subscribe
 
@@ -129,8 +131,6 @@ fs_read             = ["cwd://", "home://", "/absolute/path"]
 fs_write            = ["cwd://"]
 host_process        = ["npx"]         # Airlock Override: escape hatch to host
 allow_persistent    = false           # operator sub-grant: persistent (instance-outliving) child procs
-ipc_publish         = ["registry.*"]  # legacy; superseded by [publish] when present
-ipc_subscribe       = ["registry.*"]  # legacy; superseded by [subscribe] when present
 identity            = ["resolve"]     # "resolve", "link", "admin"
 allow_prompt_injection = false        # gate on system-prompt modification
 ```
@@ -288,15 +288,34 @@ The three lifecycle states that matter to the health monitor are `Unloaded`, `Re
 
 ### New: `[publish]` / `[subscribe]` (current)
 
-Declared as top-level TOML tables where each key is an IPC topic pattern and each value carries a typed WIT payload reference. A `handler` on a `[subscribe]` entry (with an optional `priority`) declares an interceptor binding. These tables simultaneously serve as the IPC ACL when non-empty, superseding `capabilities.ipc_publish` and `capabilities.ipc_subscribe`.
+Declared as top-level TOML tables where each key is an IPC topic pattern and each value carries a WIT payload reference (or `"opaque"`). A `handler` on a `[subscribe]` entry (with an optional `priority`) declares an interceptor binding. These tables are the IPC ACL: the keys are exactly the topics the capsule may publish to or subscribe from.
 
 This is the format all new capsules must use. `astrid-capsule-http`, `astrid-capsule-fs`, `astrid-capsule-context-engine`, and `astrid-capsule-memory` all use it.
 
-### Legacy ACL: `capabilities.ipc_publish` / `capabilities.ipc_subscribe`
+### Uplink and proxy capsules: `wit = "opaque"`
 
-IPC ACL declared in the `[capabilities]` block as plain string arrays rather than `[publish]` / `[subscribe]` tables. `astrid-capsule-cli` is an example: it uses `capabilities.ipc_publish` and `capabilities.ipc_subscribe` directly because it is an uplink proxy that routes opaque bytes and binds no handlers.
+An uplink owns the Unix socket and bridges external clients onto the bus; a proxy forwards traffic it does not originate. Both relay bytes across many topics whose payload schemas they do not define, so they cannot name a typed WIT record per entry. They declare `wit = "opaque"` instead: the entry keeps its publish or subscribe ACL but makes no claim about payload shape.
 
-`effective_ipc_publish_patterns()` and `effective_ipc_subscribe_patterns()` resolve the ACL: the `[publish]` / `[subscribe]` tables take precedence when present, falling back to the `capabilities.ipc_*` arrays. A capsule using the arrays can migrate to the tables one topic at a time.
+`astrid-capsule-cli`, the canonical uplink, is built entirely this way. It declares `uplink = true` and `net_bind = ["unix:*"]`, binds no handlers, and lists every topic it relays as an opaque entry (representative subset):
+
+```toml
+[capabilities]
+uplink   = true
+net_bind = ["unix:*"]
+
+[publish]
+"cli.v1.command.execute"    = { wit = "opaque" }
+"astrid.v1.request.*"       = { wit = "opaque" }
+"astrid.v1.admin.*.*"       = { wit = "opaque" }
+"registry.v1.get_providers" = { wit = "opaque" }
+
+[subscribe]
+"agent.v1.response"         = { wit = "opaque" }
+"astrid.v1.response.*"      = { wit = "opaque" }
+"astrid.v1.capsules_loaded" = { wit = "opaque" }
+```
+
+The keys are the security boundary: the kernel denies any publish or subscribe outside them, exactly as for a typed capsule. `opaque` waives the payload type check, never the ACL.
 
 ---
 

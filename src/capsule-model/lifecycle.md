@@ -214,4 +214,5 @@ The KV key `"__state"` is the conventional key written and read by the macro. Ca
 ## See also
 
 - [The Capsule Manifest and Engines](manifest-and-engines.md)
+- [Designing Capsules](designing-capsules.md)
 - [Packages: Approval, Identity, Uplink](../host-abi/packages-approval-identity-uplink.md)

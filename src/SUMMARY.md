@@ -12,6 +12,7 @@
 - [The Capsule Manifest and Engines](./capsule-model/manifest-and-engines.md)
 - [Imports, Exports, and Dependency Resolution](./capsule-model/imports-exports-resolution.md)
 - [Capsule Lifecycle](./capsule-model/lifecycle.md)
+- [Designing Capsules](./capsule-model/designing-capsules.md)
 
 # Part III: The Host ABI
 

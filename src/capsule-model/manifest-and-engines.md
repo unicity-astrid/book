@@ -356,4 +356,5 @@ The loader creates a `CompositeCapsule` with a `WasmEngine` (because `[[componen
 
 - [Imports, Exports, and Dependency Resolution](imports-exports-resolution.md)
 - [Capsule Lifecycle](lifecycle.md)
+- [Designing Capsules](designing-capsules.md)
 - [Capability Gating](../host-abi/capability-gating.md)

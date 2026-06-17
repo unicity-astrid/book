@@ -21,20 +21,20 @@ cd astrid && cargo build --release   # binary at ./target/release/astrid
 
 ## Set up a runtime
 
-`astrid init` walks you through it. It fetches a *distro*, a curated set of capsules for a use case, lets you pick a provider, resolves any configuration the capsules need, and installs them with their manifests.
+`astrid init` walks you through it. It fetches a *distro*, a curated set of capsules for a use case, lets you pick a provider, and prompts for whatever that provider needs, including its API key, before installing the capsules with their manifests.
 
 ```bash
 astrid init
 ```
 
-A distro is a `Distro.toml` manifest, and `init` writes a `Distro.lock` pinning every capsule by BLAKE3 hash, so the same `init` reproduces the same fleet. You can point it at your own with `astrid init --distro @yourorg/your-distro`.
+The provider is a capsule, so onboarding is not tied to one vendor: pick Anthropic, OpenAI, or any OpenAI-compatible endpoint (through the `openai-compat` provider), and `init` elicits that provider's credentials as it installs it. Secrets are stored per principal in the secret store, never passed as a flag on the command line. A distro is a `Distro.toml` manifest, and `init` writes a `Distro.lock` pinning every capsule by BLAKE3 hash, so the same `init` reproduces the same fleet. You can point it at your own with `astrid init --distro @yourorg/your-distro`.
 
 ## Talk to an agent
 
-The built-in chat is the frontend. Give it a provider key and go:
+The built-in chat is the frontend. Because `init` already configured the provider and stored its key, you just run:
 
 ```bash
-ANTHROPIC_API_KEY=sk-... astrid chat
+astrid chat
 ```
 
 The first time you run it, the CLI auto-starts the daemon as a background process, connects over a Unix domain socket, and streams the agent's output. Ask it to do something real, read a file, fetch a page, write a note, and watch it call tools.

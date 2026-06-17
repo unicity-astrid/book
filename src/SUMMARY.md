@@ -1,6 +1,7 @@
 # Summary
 
 [Introduction](./introduction.md)
+[Getting Started: See It Work](./getting-started/see-it-work.md)
 
 # Part I: Foundations
 
@@ -57,6 +58,10 @@
 
 - [The RFC Process](./evolution/rfc-process.md)
 - [WIT Contracts and the Three-Repo Flow](./evolution/wit-contracts.md)
+
+# Afterword
+
+- [The Labyrinth: Why Astrid Is Shaped This Way](./afterword/the-labyrinth.md)
 
 # Appendices
 

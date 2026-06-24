@@ -4,7 +4,7 @@ Generated from the `error-code` variants in `wit/host/*.wit`. Every fallible hos
 
 ## `approval@1.0.0`
 
-`invalid-input`, `timeout`, `store-unavailable`, `unknown(string)`
+`invalid-input`: The provided input does not meet the required format or criteria., `timeout`, `store-unavailable`, `unknown(string)`
 
 ## `elicit@1.0.0`
 

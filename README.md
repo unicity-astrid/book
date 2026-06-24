@@ -13,3 +13,25 @@ The reference appendices (capability catalog, host ABI error codes, topic regist
 Dual-licensed under [MIT](LICENSE-MIT) and [Apache 2.0](LICENSE-APACHE).
 
 Copyright (c) 2025-2026 Joshua J. Bouw and Unicity Labs.
+
+## Contributing Guidelines
+
+We welcome contributions to the Astrid Book! Here are some ways you can help:
+
+- **Documentation**: Improve existing documentation or add new sections.
+- **Testing**: Help us write and maintain tests for the code.
+- **Issues**: Report bugs or suggest features.
+- **Code**: If you're familiar with the codebase, feel free to submit pull requests for improvements.
+
+Please ensure that your contributions adhere to the project's coding standards and guidelines.
+
+## Project Structure
+
+The project is organized as follows:
+
+- **src/**: Contains the source files for the documentation.
+- **tools/**: Scripts for generating appendices and footers.
+- **README.md**: The main documentation file.
+- **LICENSE-APACHE** and **LICENSE-MIT**: Licensing information.
+
+Understanding this structure will help you navigate the project more effectively.

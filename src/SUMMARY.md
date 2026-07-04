@@ -2,6 +2,7 @@
 
 [Introduction](./introduction.md)
 [Getting Started: See It Work](./getting-started/see-it-work.md)
+[Getting Started: Your First Capsule](./getting-started/your-first-capsule.md)
 
 # Part I: Foundations
 

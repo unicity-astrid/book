@@ -18,6 +18,8 @@ A reader of this book has seen all of this before. The private view is [per-prin
 
 Astrid makes one upgrade, and it matters. A Plan 9 namespace was enforced by a kernel you administered; the authority claim was rooted in trusting the machine, which was fine when every machine belonged to one institution. An Astrid capability is a signed token. The claim carries its own proof, so it survives delegation across parties that do not trust each other, and a child can only ever be granted less than its parent held. Namespaces enforced by trust become capabilities enforced by cryptography.
 
+One inheritance is still in probate. Plan 9 was distributed by construction: any resource, served from any machine, mounted into any namespace. Astrid today is one machine's house. The signed capability was designed to survive the network hop that the namespace could not, but the hop itself is a chapter of this lineage that is not yet written, and this book does not pretend otherwise.
+
 ## The operating system in a browser tab
 
 In 1996 the same group distilled the design again, for a networked world, and called it Inferno.
@@ -46,4 +48,4 @@ Plan 9 was an answer waiting for its question. The question arrived speaking nat
 
 ## The restoration
 
-The Labyrinth argued from fiction that safety must live in the walls, not in the mind. History makes the same argument from the other direction: the walls were designed twice, correctly, by the best systems programmers alive, and the world declined them, because there was no common substrate to carry the modules and no tenant that could not live without the isolation. Both preconditions arrived within a few years of each other. Astrid is not a novel idea. It is an inherited one, restored, with the missing pieces finally underneath it.
+The Labyrinth argued from fiction that safety must live in the walls, not in the mind. History makes the same argument from the other direction: the walls were designed twice, correctly, by the best systems programmers alive, and the world declined them, because there was no common substrate to carry the modules and no tenant that could not live without the isolation. Both preconditions arrived within a few years of each other. And one force reversed outright: Unix beat Plan 9 by being free and everywhere while the better design sat behind a license. This time the inheritance is the thing that is free. Astrid is not a novel idea. It is an inherited one, restored, with the missing pieces finally underneath it.

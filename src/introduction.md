@@ -22,4 +22,4 @@ This is the canonical reference. It explains the whole system in depth, grounded
 
 The parts are ordered so each builds on the last, and each also stands alone.
 
-**If you want the argument for why Astrid is shaped this way,** the long version is the [Afterword](afterword/the-labyrinth.md). It is optional, and the machinery in between does not depend on it.
+**If you want the argument for why Astrid is shaped this way,** the long version is the three-chapter [Afterword](afterword/the-labyrinth.md): the walls, argued from fiction; the architecture, argued from the operating systems that got here first; and the tenant, argued from the minds that did. It is optional, and the machinery in between does not depend on it.

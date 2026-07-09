@@ -62,7 +62,7 @@
 
 # Afterword
 
-- [The Labyrinth: Why Astrid Is Shaped This Way](./afterword/the-labyrinth.md)
+- [The Labyrinth: Why Unicity Astrid OS Is Shaped This Way](./afterword/the-labyrinth.md)
 - [The Lineage: The Operating Systems That Got Here First](./afterword/the-lineage.md)
 - [The Namesake: The Minds That Got Here First](./afterword/the-namesake.md)
 

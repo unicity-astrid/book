@@ -41,7 +41,7 @@
 
 # Part VI: Storage and State
 
-- [The VFS Copy-on-Write Overlay](./storage/vfs-overlay.md)
+- [Workspace Copy-on-Write and the VFS Overlay](./storage/vfs-overlay.md)
 - [KV Storage](./storage/kv.md)
 - [The Cryptographic Audit Chain](./storage/audit-chain.md)
 

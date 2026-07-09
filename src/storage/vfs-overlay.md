@@ -1,6 +1,37 @@
-# The VFS Copy-on-Write Overlay
+# Workspace Copy-on-Write and the VFS Overlay
 
-The `astrid-vfs` crate (`core/crates/astrid-vfs`) implements a layered virtual filesystem that runs entirely inside the kernel daemon. It gives each capsule invocation a sandboxed view of the workspace: reads go through to a shared, read-only lower layer, and writes land in an ephemeral per-principal upper layer that is invisible to every other principal. The design intentionally mirrors Linux overlayfs at a semantic level, but is implemented in safe Rust on top of the `cap-std` crate rather than through kernel mounts.
+The `astrid-vfs` crate (`core/crates/astrid-vfs`) carries two distinct copy-on-write mechanisms, and knowing which one actually fronts a capsule's workspace matters. The in-process `OverlayVfs` documented in the second half of this page is a layered virtual filesystem inside the kernel daemon: reads fall through to a read-only lower layer, writes land in an ephemeral upper layer, mirroring Linux overlayfs semantically but implemented in safe Rust on `cap-std`. Since 0.9.4 it is **not** the workspace write path. Workspaces get either direct writes or a real OS-level copy-on-write from `workspace_cow`, chosen by the dispatch below.
+
+## Which VFS a Workspace Actually Gets
+
+Capsule load (`core/crates/astrid-capsule/src/engine/wasm/mod.rs`) chooses the workspace VFS by asking one question: is the workspace under git version control? Detection is automatic, no config flag, via gitoxide work-tree discovery (`workspace_is_git_managed`), which walks up from the workspace root exactly as git does, correctly following the `.git` *file* that a submodule or linked worktree uses.
+
+- **Git-managed workspace**: a direct `HostVfs` over `workspace_root`. No copy-on-write engages at all. Writes land on the real files that spawned processes (`cargo`, `git`, a `build.rs`) and the user read, and git itself is the rollback. No upper tempdir is created.
+- **Non-git workspace**: an OS-level copy-on-write clone or mount from `workspace_cow` (next section). The fs host, the OS-sandbox writable root, and the working directory of every spawned process all resolve to one real merged path, so the capsule and its subprocesses share a single filesystem view.
+- **Fallback**: when no copy-on-write backend can be established, the load fails closed to `NoCow`: direct writes to the pristine workspace, no rollback, and a warning naming the reason. There is never a silently faked copy-on-write.
+
+The workspace VFS, the OS-sandbox writable root, and the fs-host path confinement all resolve against the same effective root, so the security gate and the filesystem can never disagree about where writes go.
+
+## OS-Level Copy-on-Write: `workspace_cow`
+
+The in-process `OverlayVfs` had a structural blind spot: it diverted a capsule's writes into a temporary upper directory that only the fs host could see. A spawned process opens the workspace through the OS, not through the VFS, so it read the pristine lower and never the overlay's upper. The copy-on-write was invisible to exactly the tools that matter.
+
+`astrid_vfs::workspace_cow` replaces that for non-git workspaces with a real OS-level mechanism behind the `WorkspaceCow` trait. Backends are chosen by `detect_cow_backend`:
+
+- **macOS**: `ApfsCow`, an APFS `clonefile(2)` clone.
+- **Linux**: `OverlayfsCow`, a native `overlayfs` mount when the daemon holds mount authority, with `fuse-overlayfs` as the userspace fallback.
+- **Fallback everywhere**: `NoCow`, the fail-closed default described above.
+
+Preparing a workspace yields a `PreparedWorkspace` whose `merged_path` becomes the effective workspace root: the single real directory the principal writes to and spawned processes run in. Writes are live in the merged tree, where `cargo` and the user look. The pristine workspace is mutated only by an explicit promote and discarded by rollback:
+
+- `PromoteWorkspace` commits the merged tree into the pristine workspace.
+- `RollbackWorkspace` discards it.
+
+Both are audited kernel admin requests, gated by the capabilities `self:workspace:promote` and `self:workspace:rollback` (`core/crates/astrid-kernel/src/kernel_router/mod.rs`), and the copy-on-write is torn down on capsule unload.
+
+One security detail carries the whole gate: `PreparedWorkspace::mask_from_children` lists the copy-on-write bookkeeping directories (the overlayfs `upper`/`work`, the APFS clone root) that the OS sandbox must hide from spawned children. Without the mask a child could write the upper directly and smuggle changes past promote/rollback. The list is threaded into the sandbox's hidden-path set (see [The OS Process Sandbox](../security/os-process-sandbox.md)).
+
+The APFS and `NoCow` backends are runtime-tested; the Linux `overlayfs` mount is compile-checked with a CI-validated integration test. A per-principal copy-on-write workspace is a tracked follow-up.
 
 ## The `Vfs` Trait
 
@@ -76,7 +107,9 @@ fn make_relative(requested: &str) -> &Path {
 
 File descriptor count is bounded at two points: a `Semaphore` with 64 permits that must be acquired before calling `open` on the OS, and a hard check that the `open_files` map has fewer than 64 entries before inserting. A read or write that would exceed 50 MB is rejected with `VfsError::PermissionDenied`. The 50 MB limit is consistent across both `HostVfs::read` and `OverlayVfs::commit`.
 
-## `OverlayVfs`: The Copy-on-Write Layer
+## `OverlayVfs`: The In-Process Copy-on-Write Layer
+
+Since 0.9.4 `OverlayVfs` is not in the workspace write path; the dispatch above hands a workspace either a direct `HostVfs` or the OS-level copy-on-write. Its remaining production role is the per-principal isolation stood up by `OverlayVfsRegistry` (below). The mechanics documented here are still the shipped code.
 
 `OverlayVfs` (`src/overlay.rs`) holds two `Box<dyn Vfs>` values: `lower` (read-only workspace) and `upper` (ephemeral scratch space, normally backed by a `tempfile::TempDir`).
 
@@ -170,7 +203,7 @@ The docstring notes an important assumption: WASM capsules are single-threaded, 
 
 > `OverlayVfs::commit` and `OverlayVfs::rollback` are not called from any production path today; the registry simply stands up the data-structure isolation required by invariant #7 from issue #653.
 
-The infrastructure is built and tested, but the capsule-level plumbing that would call commit at the end of a tool invocation does not exist yet.
+The durable-write gate for workspaces landed at the OS level instead: `WorkspaceCow::promote` and `rollback` (see the top of this page) are the production commit and rollback for workspace changes. The in-process `commit`/`rollback` remain built and tested with no call site.
 
 ### Rollback
 
@@ -294,7 +327,7 @@ Path resolution is tested in `src/path.rs`: valid relative paths, `../` traversa
 
 ## Limitations to Know
 
-- `commit` and `rollback` are not called from any production code path. The overlay provides write isolation per-principal, but changes are never durable unless a caller explicitly commits them. No such caller exists today.
+- `OverlayVfs::commit` and `rollback` are not called from any production code path; the workspace durable-write gate is `WorkspaceCow::promote`/`rollback` at the OS level. The overlay provides per-principal write isolation only.
 - Lower-layer files cannot be deleted through the overlay. Whiteout support is absent.
 - `WorktreeVfs` and `IgnoreBoundary` are dead code.
 - There is no per-principal disk-space quota. The 50 MB per-file ceiling is not a per-invocation or per-principal total.

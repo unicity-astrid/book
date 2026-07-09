@@ -246,6 +246,22 @@ kernel Host impls   astrid-sys types     contracts structs
 
 All three consumers use a committed `wit-staging/` that ships with each crate or binary, so `cargo install` and published-crate builds work without the submodule being checked out.
 
+## Installed Layout: Pin Retention and Skew Visibility
+
+Capsules record BLAKE3 pins of their vendored WIT files in `meta.json` (`wit_files`). Since 0.9.4 the bytes behind those pins are retained, and drift between a capsule's contracts snapshot and the daemon's is visible without hand-hashing files.
+
+**The store.** Install content-addresses every vendored WIT file into a dedicated blob store at `~/.astrid/wit/store/<blake3-hex>.wit`. The top of `~/.astrid/wit/` holds only the daemon's canonical named copies, so `astrid capsule wit gc` can sweep the store without endangering them. A pin read back from on-disk `meta.json` is untrusted input: it is validated as a BLAKE3 hex digest before it is ever used to build a store lookup path, so a tampered pin cannot dereference a file outside the store.
+
+**The canonical baseline.** The daemon is authoritative for `~/.astrid/wit/astrid-contracts.wit`. At boot it rewrites the canonical from its own system fleet: the contracts pin that the plurality of install-principal capsules agree on, dereferenced from the store. The plurality rule makes the baseline order-independent, so a single side-loaded capsule on a different pin cannot flip it away from the majority fleet. An absent canonical is written, a differing one is overwritten (a fleet or daemon upgrade legitimately moves the baseline), and byte-identical is a no-op. Install-time seeding remains as a bootstrap fallback for CLI-only flows where no daemon ever booted. The refresh is best-effort and warn-only: a write failure logs a warning and never breaks boot.
+
+**Why skew matters and why it never fails.** The bus contracts are pure data-shape records with zero WIT functions, so a capsule pinning different contracts never fails at link time; it fails silently at runtime when a record shape moves. Skew is therefore surfaced, never enforced, on three read paths:
+
+- `astrid capsule show <name>` prints the capsule's contracts pin with a match / MISMATCH marker.
+- `astrid capsule list` prints one summary line naming any mismatching capsules (per-capsule pins with `--verbose`).
+- A successful install whose contracts pin differs from the canonical prints a notice.
+
+Side-loading a dev capsule built against newer contracts than the daemon's fleet is legitimate, so install and every read path succeed regardless. A fresh home degrades silently, and installs that predate pin retention cannot be backfilled by definition.
+
 ## IPC Topic Naming Convention
 
 The `astrid-bus:*` interface names map directly to IPC topic prefixes. The convention is:

@@ -19,7 +19,7 @@ This is the part that surprises people, so it goes first. There are two differen
 
 **The VFS layer (the capsule's own file access, through the host ABI).** The capsule sees two schemes:
 
-- `cwd://` resolves to the workspace, which is the real project directory you launched Astrid in. Same folder. Writes land in the copy-on-write overlay until a human commits them.
+- `cwd://` resolves to the workspace, which is the real project directory you launched Astrid in. Same folder. In a git-managed workspace, writes land directly on the real files and git is the rollback. In a non-git workspace, the capsule and every process it spawns share one OS-level copy-on-write directory, and the pristine tree changes only on an explicit, audited promote (see [Workspace Copy-on-Write](../storage/vfs-overlay.md)).
 - `home://` resolves to the per-principal Astrid home, `~/.astrid/home/{principal}/`, not your real `~`. It is resolved per invoking principal, so two principals sharing one `cwd://` get two different `home://`.
 
 So at this layer your intuition holds exactly: the capsule touches the same project folder you did, but its "home" is Astrid's home, not yours.
@@ -36,7 +36,7 @@ The Linux sandbox prepends `bwrap` with mount rules (`core/crates/astrid-workspa
 - `--ro-bind / /` mounts the entire host filesystem read-only at its real paths, so binaries and libraries resolve normally.
 - `--dev /dev`, `--proc /proc`, and `--tmpfs /tmp` give standard device, proc, and a disposable tmp.
 - `--bind <workspace> <workspace>` mounts the workspace read-write at its same absolute path.
-- Each hidden path is overlaid with `--tmpfs` to blank it out. Hidden tmpfs mounts are emitted before the writable bind so a writable directory nested inside a hidden one (for example a capsule dir under a hidden `~/.astrid`) can punch back through.
+- Each hidden path is overlaid with `--tmpfs` to blank it out. Hidden tmpfs mounts are emitted before the writable bind so a writable directory nested inside a hidden one (for example a capsule dir under a hidden `~/.astrid`) can punch back through. On a non-git workspace, the copy-on-write bookkeeping directories (the overlayfs `upper`/`work`, the APFS clone root) are always in the hidden set, so a child cannot write the upper directly and bypass the promote/rollback gate.
 - `--unshare-all` drops every namespace, then `--share-net` restores networking so `npm` and `cargo` can fetch. `--die-with-parent` prevents orphans.
 
 Read posture on Linux: because of `--ro-bind / /`, a subprocess can *read* your whole home read-only, including `~/.ssh`, unless that path is explicitly hidden. It can only *write* to the workspace and `/tmp`.

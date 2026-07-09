@@ -1,6 +1,6 @@
 # Distros and the Content-Addressed Store
 
-A **distro** is a curated, versioned bundle of capsules that defines a complete Astrid deployment. Two files govern every distro: `Distro.toml`, which declares the bundle, and `Distro.lock`, which pins exact resolved versions and BLAKE3 hashes for reproducible installs. Below those files sits the content-addressed store, a pair of append-only directories (`bin/` and `wit/`) shared across all capsules on a host, where every WASM binary and WIT interface file is named by its BLAKE3 hash.
+A **distro** is a curated, versioned bundle of capsules that defines a complete Astrid deployment. Two files govern every distro: `Distro.toml`, which declares the bundle, and `Distro.lock`, which pins exact resolved versions and BLAKE3 hashes for reproducible installs. Below those files sits the content-addressed store, a pair of append-only directories (`bin/` and `wit/store/`) shared across all capsules on a host, where every WASM binary and WIT interface file is named by its BLAKE3 hash. The top of `wit/` holds the daemon's canonical named copies (notably `astrid-contracts.wit`), kept apart from the hash-named store so `astrid capsule wit gc` can sweep the store without touching them (see [WIT Contracts](../evolution/wit-contracts.md)).
 
 This page covers the full lifecycle: writing `Distro.toml`, running `astrid init`, managing individual capsules with `install`, `update`, `remove`, and `tree`, and how the store, `meta.json`, and export-conflict detection interact.
 

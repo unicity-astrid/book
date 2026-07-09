@@ -1,6 +1,6 @@
 # Introduction
 
-Astrid is an operating system for AI agents. It treats an agent the way an operating system treats a process: it boots the agent, isolates it, grants it exactly the authority it needs and no more, and writes down everything it does in a ledger that cannot be quietly rewritten. It does not trust the thing it is running. Because of how it is built, it does not need to.
+Unicity Astrid OS is an operating system for AI agents. It treats an agent the way an operating system treats a process: it boots the agent, isolates it, grants it exactly the authority it needs and no more, and writes down everything it does in a ledger that cannot be quietly rewritten. It does not trust the thing it is running. Because of how it is built, it does not need to.
 
 Concretely: an agent runs as WebAssembly inside a sandbox with no ambient authority. Every capability it has, every file path, every network host, every tool, is a signed grant the host checks before it moves a byte. Every action it takes is appended to a hash-linked, signed audit chain. The intelligence, the model, the agent loop, the tools, lives entirely in user-space capsules; the kernel itself holds no model and no business logic. It routes events and enforces boundaries.
 
@@ -22,4 +22,4 @@ This is the canonical reference. It explains the whole system in depth, grounded
 
 The parts are ordered so each builds on the last, and each also stands alone.
 
-**If you want the argument for why Astrid is shaped this way,** the long version is the three-chapter [Afterword](afterword/the-labyrinth.md): the walls, argued from fiction; the architecture, argued from the operating systems that got here first; and the tenant, argued from the minds that did. It is optional, and the machinery in between does not depend on it.
+**If you want the argument for why Unicity Astrid OS is shaped this way,** the long version is the three-chapter [Afterword](afterword/the-labyrinth.md): the walls, argued from fiction; the architecture, argued from the operating systems that got here first; and the tenant, argued from the minds that did. It is optional, and the machinery in between does not depend on it.

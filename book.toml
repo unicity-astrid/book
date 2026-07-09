@@ -1,7 +1,7 @@
 [book]
-title = "The Astrid Book"
+title = "The Unicity Astrid OS Book"
 authors = ["Joshua J. Bouw", "Unicity Labs"]
-description = "The canonical reference for Astrid OS: the kernel, the capsule model, the host ABI, the bus, and the security model."
+description = "The canonical reference for Unicity Astrid OS: the kernel, the capsule model, the host ABI, the bus, and the security model."
 language = "en"
 src = "src"
 

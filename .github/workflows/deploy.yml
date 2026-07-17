@@ -22,10 +22,13 @@ jobs:
       - uses: peaceiris/actions-mdbook@v2
         with:
           mdbook-version: "0.5.2"
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v5
       - name: Build
         run: mdbook build
         env:
-          MDBOOK_OUTPUT__HTML__SITE_URL: /book/
+          MDBOOK_OUTPUT__HTML__SITE_URL: ${{ steps.pages.outputs.base_path }}/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: book
@@ -38,4 +41,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

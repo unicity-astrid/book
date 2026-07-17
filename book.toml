@@ -8,8 +8,8 @@ src = "src"
 [output.html]
 default-theme = "ayu"
 preferred-dark-theme = "ayu"
-git-repository-url = "https://github.com/unicity-astrid/book"
-edit-url-template = "https://github.com/unicity-astrid/book/edit/main/{path}"
+git-repository-url = "https://github.com/astrid-runtime/book"
+edit-url-template = "https://github.com/astrid-runtime/book/edit/main/{path}"
 
 [output.html.fold]
 enable = true

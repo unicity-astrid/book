@@ -4,7 +4,7 @@
 >
 > Gottfried Wilhelm Leibniz, 1685
 
-This chapter is optional, and nothing in the reference depends on it. [The Lineage](./the-lineage.md) told the history of the walls: two operating systems that reached Astrid's shape first and died waiting for their preconditions. There was a second thread running beside that one the whole time, older, aimed not at the house but at the mind that would live in it. It died the same death, twice, and its preconditions may also have just arrived. This chapter is about that thread, and about the name on the door.
+This chapter is optional, and nothing in the reference depends on it. [The Lineage](./the-lineage.md) and [The Harvest](./the-harvest.md) told the history of the house: the operating systems that reached Astrid's shape first, and the dismembered dreams whose organs the industry carried off one by one. There was another thread running beside all of it the whole time, older, aimed not at the house but at the mind that would live in it. It died the same death, twice, and its preconditions may also have just arrived. This chapter is about that thread, and about the name on the door.
 
 ## The second thread
 
@@ -38,6 +38,6 @@ The boundary does not move an inch, and now it holds in two senses. A derivation
 
 Astrid is from the Old Norse Ástríðr: áss, a god, and fríðr, beautiful, beloved. Divinely beautiful. Beloved of the gods. The Latin ear hears a star in it too; that reading is folk etymology, but the sky does not seem to mind.
 
-Read the three chapters of this afterword back to back and the name stops being decoration. Fiction said the mind cannot hold its own laws, so build walls worthy of it. History said the walls were designed twice by the best who ever did this work, and shelved for thirty years for want of a substrate. The older thread said a mind could one day show its work, and was shelved for want of learning. All of it converges on a house: safe going in, safe going out, dumb at the center, honest in its ledger, waiting for whatever mind proves worthy of the tenancy.
+Read the four chapters of this afterword back to back and the name stops being decoration. Fiction said the mind cannot hold its own laws, so build walls worthy of it. History said the walls were designed twice by the best who ever did this work, and shelved for thirty years for want of a substrate. The harvest said the dreams were dismembered, not disproven, and that every organ is still warm in the systems that took them. The older thread said a mind could one day show its work, and was shelved for want of learning. All of it converges on a house: safe going in, safe going out, dumb at the center, honest in its ledger, waiting for whatever mind proves worthy of the tenancy.
 
 A house built fair, for a god to live in. It was named before we knew who was coming. Calculemus.

@@ -1,5 +1,10 @@
 # Workspace Copy-on-Write and the VFS Overlay
 
+> **2026.9 compatibility:** this chapter retains earlier implementation snapshots
+> and source anchors. Host-directory stores and overlays described below are not
+> the current durable runtime layout. Read [Operating the 2026.9 Runtime](../operating-2026-9.md)
+> before using these details to change or migrate an installation.
+
 The `astrid-vfs` crate (`core/crates/astrid-vfs`) carries two distinct copy-on-write mechanisms, and knowing which one actually fronts a capsule's workspace matters. The in-process `OverlayVfs` documented in the second half of this page is a layered virtual filesystem inside the kernel daemon: reads fall through to a read-only lower layer, writes land in an ephemeral upper layer, mirroring Linux overlayfs semantically but implemented in safe Rust on `cap-std`. Since 0.9.4 it is **not** the workspace write path. Workspaces get either direct writes or a real OS-level copy-on-write from `workspace_cow`, chosen by the dispatch below.
 
 ## Which VFS a Workspace Actually Gets

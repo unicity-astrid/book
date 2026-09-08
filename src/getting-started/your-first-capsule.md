@@ -1,6 +1,10 @@
 # Getting Started: Your First Capsule
 
-The previous chapter had you run an agent. This one has you extend the OS it runs on. In four commands you scaffold a capsule, compile it to WebAssembly, lint its wiring, and install it into the running daemon. No restart. When you are done, every agent on your machine has a tool that did not exist ten minutes ago.
+The previous chapter started a runtime. This one extends it: scaffold a capsule,
+compile it to WebAssembly, check its wiring, and install it into the running
+daemon. No restart is required. Installation does not make the tool available
+to every agent on the machine: discovery and invocation depend on the selected
+principal's grants and tool-broker composition.
 
 You need a Rust toolchain (`rustup`) and a working Astrid install from the previous chapter. Nothing else.
 
@@ -83,7 +87,10 @@ astrid capsule check
 astrid capsule install .
 ```
 
-The daemon does not restart. The kernel verifies the package, registers the manifest's ACLs, sandboxes the component, and the tool bus gains `hello`. Prove it end to end:
+The daemon does not restart. The kernel verifies the package, registers the
+manifest's ACLs, and sandboxes the component. To prove tool invocation through
+chat, you also need a configured chat composition and a principal authorized to
+use this capsule. With those prerequisites in place:
 
 ```bash
 astrid chat

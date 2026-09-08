@@ -1,5 +1,10 @@
 # KV Storage
 
+> **2026.9 compatibility:** this chapter retains earlier implementation snapshots
+> and source anchors. Host-directory stores and overlays described below are not
+> the current durable runtime layout. Read [Operating the 2026.9 Runtime](../operating-2026-9.md)
+> before using these details to change or migrate an installation.
+
 Astrid provides per-(principal, capsule) key-value storage through the `astrid:kv@1.0.0` WIT
 package. Every capsule gets an isolated slice of a shared embedded store. Values are arbitrary
 bytes up to 1 MiB. The store is ACID-compliant and supports atomic compare-and-swap.

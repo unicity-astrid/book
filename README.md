@@ -1,6 +1,6 @@
-# The Unicity Astrid OS Book
+# The Astrid Book
 
-The canonical reference for Unicity Astrid OS: the kernel, the capsule model, the host ABI, the bus, and the security model.
+The canonical reference for Astrid: the kernel, the capsule model, the host ABI, the bus, and the security model.
 
 Built with [mdBook](https://github.com/rust-lang/mdBook).
 

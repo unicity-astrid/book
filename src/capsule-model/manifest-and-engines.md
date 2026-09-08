@@ -155,7 +155,7 @@ allow_prompt_injection = false        # gate on system-prompt modification
 
 ### `[env]`
 
-Declares environment variables the capsule requires. Values are elicited from the user during `astrid capsule install` and stored per-principal in the KV store (secrets go through `FileSecretStore` at `~/.astrid/secrets/`).
+Declares environment variables the capsule requires. Values are elicited from the user during `astrid capsule install` and stored for the selected principal. In 2026.9, runtime secrets use the authority store; `~/.astrid/secrets/` is a legacy migration source, not the current store. See [Operating the 2026.9 Runtime](../operating-2026-9.md).
 
 ```toml
 [env]
@@ -169,7 +169,7 @@ Accepted `type` values:
 
 | Value | Behavior |
 |-------|----------|
-| `"secret"` | Masked prompt at install; stored in `FileSecretStore` (`~/.astrid/secrets/`). `enum_values` is ignored. |
+| `"secret"` | Masked prompt at install; stored through the runtime secret authority. `enum_values` is ignored. |
 | `"text"` | Plain text input; stored in env JSON. |
 | `"select"` | Dropdown from `enum_values`; stored in env JSON. A single-choice enum auto-fills without prompting. |
 | `"array"` | Comma-separated list; stored in env JSON. |

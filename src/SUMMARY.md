@@ -1,6 +1,7 @@
 # Summary
 
 [Introduction](./introduction.md)
+[Operating the 2026.9 Runtime](./operating-2026-9.md)
 [Getting Started: See It Work](./getting-started/see-it-work.md)
 [Getting Started: Your First Capsule](./getting-started/your-first-capsule.md)
 
@@ -62,7 +63,7 @@
 
 # Afterword
 
-- [The Labyrinth: Why Unicity Astrid OS Is Shaped This Way](./afterword/the-labyrinth.md)
+- [The Labyrinth: Why Astrid Is Shaped This Way](./afterword/the-labyrinth.md)
 - [The Lineage: The Operating Systems That Got Here First](./afterword/the-lineage.md)
 - [The Harvest: Where the Organs Went](./afterword/the-harvest.md)
 - [The Namesake: The Minds That Got Here First](./afterword/the-namesake.md)

@@ -1,5 +1,10 @@
 # The Boot Sequence
 
+> **2026.9 compatibility:** this chapter retains earlier implementation snapshots
+> and source anchors. Host-directory stores and overlays described below are not
+> the current durable runtime layout. Read [Operating the 2026.9 Runtime](../operating-2026-9.md)
+> before using these details to change or migrate an installation.
+
 This page traces the path from `astrid-daemon` receiving `run()` through the moment the readiness
 sentinel file appears on disk. Every ordering constraint is real code. File anchors are given as
 `crate/src/file.rs:line`.
